@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <title>แดชบอร์ด - ระบบบันทึกจ่ายยา
-rt-PA | Antidote | Antivenin</title>
+rt-PA | Antidote </title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -297,8 +297,8 @@ rt-PA | Antidote </span>
         </div>
         <div class="table-responsive">
           <table class="table table-sm align-middle mb-0">
-            <thead><tr><th>ชื่อยา</th><th class="text-end">จำนวนที่จ่าย</th></tr></thead>
-            <tbody id="topDrugTableBody"><tr><td colspan="2" class="text-center text-muted py-3">กำลังโหลด...</td></tr></tbody>
+            <thead><tr><th>ชื่อยา</th><th>ความแรง</th><th>Lot</th><th class="text-end">จำนวนที่จ่าย</th></tr></thead>
+            <tbody id="topDrugTableBody"><tr><td colspan="4" class="text-center text-muted py-3">กำลังโหลด...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -534,6 +534,18 @@ async function loadDashboard() {
     const masterByDrugId = {};
     (masterRows || []).forEach(m => { masterByDrugId[m.drug_id] = m; });
 
+    // ทำ lookup table จาก drug_stock โดยใช้ drug_id เป็น key (สำหรับดึง Lot/วันหมดอายุ มาแสดงในประวัติการจ่ายยา)
+    // records ไม่มีคอลัมน์ lot/exp ในตัวเอง จึงต้องอิงจากสต็อกปัจจุบันของยาตัวนั้น
+    // เรียง lot ตามวันหมดอายุใกล้สุดก่อน (FEFO) เพื่อสะท้อนการจ่ายยาตามหลักเภสัชกรรมทั่วไป
+    const stockByDrugId = {};
+    (stockRows || []).forEach(s => {
+      if (!stockByDrugId[s.drug_id]) stockByDrugId[s.drug_id] = [];
+      stockByDrugId[s.drug_id].push(s);
+    });
+    Object.values(stockByDrugId).forEach(arr => {
+      arr.sort((a, b) => new Date(a.exp || 0) - new Date(b.exp || 0));
+    });
+
     // join drug_stock กับ drug_master เองใน JS ผ่าน drug_id
     const allDrugs = (stockRows || []).map(d => {
       const master = masterByDrugId[d.drug_id] || {};
@@ -549,11 +561,17 @@ async function loadDashboard() {
     const drugs = allDrugs.filter(d => Number(d.stock) > 0);
 
     // records มีชื่อ/ความแรงในตัวเองอยู่แล้ว (denormalized) ใช้ time เป็นหลัก fallback created_at
-    const logs = (logRows || []).map(l => ({
-      ...l,
-      staff: (STAFF_FIELD_AVAILABLE && l[LOG_STAFF_FIELD]) ? l[LOG_STAFF_FIELD] : "ไม่ระบุ",
-      _time: parseFlexibleDate(l[LOG_TIME_FIELD] || l.created_at)
-    }));
+    // เติม lot/วันหมดอายุ โดยอ้างอิงจากสต็อกปัจจุบันของยา (drug_id เดียวกัน) เนื่องจาก records ไม่ได้บันทึก lot ไว้ตอนจ่ายยา
+    const logs = (logRows || []).map(l => {
+      const stocks = stockByDrugId[l.drug_id] || [];
+      return {
+        ...l,
+        staff: (STAFF_FIELD_AVAILABLE && l[LOG_STAFF_FIELD]) ? l[LOG_STAFF_FIELD] : "ไม่ระบุ",
+        _time: parseFlexibleDate(l[LOG_TIME_FIELD] || l.created_at),
+        lot: stocks.length ? stocks.map(s => s.lot || "-").join(", ") : "-",
+        exp: stocks.length ? stocks[0].exp : null
+      };
+    });
 
     if (!RANGE_START || !RANGE_END) initDateRange();
 
@@ -780,21 +798,29 @@ function renderTopDrugsTable(logs, rangeStart, rangeEnd) {
     .filter(l => l._time && l._time >= rangeStart && l._time <= rangeEnd)
     .forEach(l => {
       const name = l.name || "-";
-      totals[name] = (totals[name] || 0) + (Number(l.qty) || 0);
+      if (!totals[name]) {
+        totals[name] = { qty: 0, strength: l.strength || "-", lot: l.lot || "-" };
+      }
+      totals[name].qty += Number(l.qty) || 0;
     });
 
   const top = Object.entries(totals)
-    .sort((a, b) => b[1] - a[1])
+    .sort((a, b) => b[1].qty - a[1].qty)
     .slice(0, 10);
 
   const body = document.getElementById("topDrugTableBody");
   if (top.length === 0) {
-    body.innerHTML = '<tr><td colspan="2" class="text-center text-muted py-3">ไม่มีข้อมูลในช่วงที่เลือก</td></tr>';
+    body.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">ไม่มีข้อมูลในช่วงที่เลือก</td></tr>';
     return;
   }
 
-  body.innerHTML = top.map(([name, qty]) => `
-    <tr><td>${name}</td><td class="text-end fw-bold">${qty.toLocaleString("th-TH")}</td></tr>
+  body.innerHTML = top.map(([name, v]) => `
+    <tr>
+      <td>${name}</td>
+      <td>${v.strength || "-"}</td>
+      <td><span class="badge bg-secondary">${v.lot || "-"}</span></td>
+      <td class="text-end fw-bold">${v.qty.toLocaleString("th-TH")}</td>
+    </tr>
   `).join("");
 }
 
@@ -982,6 +1008,7 @@ function openDetailModal(type) {
           <div>
             <div class="fw-bold">${l.name}${l.strength ? ` (${l.strength})` : ""}</div>
             <div class="text-muted small">${l._time.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} น. · ผู้จ่ายยา: ${l.staff || "ไม่ระบุ"}</div>
+            <div class="text-muted small">Lot: ${l.lot || "-"} · วันหมดอายุ: ${l.exp ? formatDateTH(l.exp) : "-"}</div>
           </div>
           <div class="text-end">
             <div class="fw-bold fs-5">${l.qty}</div>
