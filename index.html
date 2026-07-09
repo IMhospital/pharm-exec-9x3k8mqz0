@@ -159,6 +159,20 @@ function formatDateTH(d) {
   return dt.toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" });
 }
 
+// คอลัมน์ "time" ใน records เก็บเป็น text รูปแบบไทย "DD/MM/YYYY HH:mm" เช่น "05/07/2026 09:54"
+// ต้อง parse เองเพราะ new Date(string) ของ JS จะตีความแบบ MM/DD/YYYY (สไตล์อเมริกัน) ทำให้วันที่ผิด
+function parseFlexibleDate(str) {
+  if (!str) return null;
+  const thaiMatch = String(str).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+  if (thaiMatch) {
+    const [, d, m, y, h, mi, s] = thaiMatch;
+    return new Date(Number(y), Number(m) - 1, Number(d), Number(h || 0), Number(mi || 0), Number(s || 0));
+  }
+  // fallback: ISO หรือรูปแบบอื่นที่ Date() อ่านได้ปกติ (เช่น created_at ที่เป็น timestamp จริง)
+  const fallback = new Date(str);
+  return isNaN(fallback) ? null : fallback;
+}
+
 let dailyChartInstance = null;
 let lowStockChartInstance = null;
 
@@ -176,7 +190,6 @@ async function loadDashboard() {
       // ดึงเฉพาะคอลัมน์ที่จำเป็น "ไม่รวม" pt_name และ pt_hn (ข้อมูลผู้ป่วย) เพื่อไม่ให้ข้อมูลผู้ป่วยหลุดไปที่ browser
       sbClient.from(TABLE_LOGS)
         .select("id, time, name, strength, form, qty, drug_id, created_at")
-        .order(LOG_TIME_FIELD, { ascending: false })
         .limit(5000)
     ]);
 
@@ -202,7 +215,7 @@ async function loadDashboard() {
     // records มีชื่อ/ความแรงในตัวเองอยู่แล้ว (denormalized) ใช้ time เป็นหลัก fallback created_at
     const logs = (logRows || []).map(l => ({
       ...l,
-      _time: l[LOG_TIME_FIELD] || l.created_at
+      _time: parseFlexibleDate(l[LOG_TIME_FIELD] || l.created_at)
     }));
 
     renderKpis(drugs, logs);
@@ -237,7 +250,7 @@ function renderKpis(drugs, logs) {
 
   const todayStr = new Date().toDateString();
   const todayCount = logs
-    .filter(l => l._time && new Date(l._time).toDateString() === todayStr)
+    .filter(l => l._time && l._time.toDateString() === todayStr)
     .reduce((sum, l) => sum + (Number(l.qty) || 0), 0);
   document.getElementById("kpiToday").textContent = todayCount.toLocaleString("th-TH") + " หน่วย";
 }
@@ -251,7 +264,7 @@ function renderDailyChart(logs) {
     const key = d.toLocaleDateString("th-TH", { day: "2-digit", month: "2-digit" });
     days.push(key);
     const dayTotal = logs
-      .filter(l => l._time && new Date(l._time).toDateString() === d.toDateString())
+      .filter(l => l._time && l._time.toDateString() === d.toDateString())
       .reduce((sum, l) => sum + (Number(l.qty) || 0), 0);
     counts.push(dayTotal);
   }
@@ -348,7 +361,7 @@ function renderTopDrugsTable(logs) {
 
   const totals = {};
   logs
-    .filter(l => l._time && new Date(l._time) >= thirtyDaysAgo)
+    .filter(l => l._time && l._time >= thirtyDaysAgo)
     .forEach(l => {
       const name = l.name || "-";
       totals[name] = (totals[name] || 0) + (Number(l.qty) || 0);
