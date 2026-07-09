@@ -4,31 +4,91 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>แดชบอร์ด-ระบบบันทึกจ่ายยา
-rt-PA | Antidote | Antivenin </title>
+<title>แดชบอร์ดผู้บริหาร - ระบบบันทึกจ่ายยา
+rt-PA | Antidote | Antivenin</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  body { background:#f4f6f9; font-family:'Segoe UI',Tahoma,sans-serif; }
-  .navbar-exec { background:#0c447c; }
-  .kpi-card { border:none; border-radius:14px; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
-  .kpi-value { font-size:28px; font-weight:700; }
-  .kpi-label { font-size:13px; color:#6c757d; }
-  .chart-card { border:none; border-radius:14px; box-shadow:0 2px 8px rgba(0,0,0,0.06); padding:1rem; }
-  .table thead th { font-size:12px; color:#6c757d; border-bottom:1px solid #e9ecef; }
-  .badge-danger-soft { background:#fdecea; color:#c0392b; }
-  .badge-warning-soft { background:#fff8e6; color:#b7791f; }
-  .last-updated { font-size:12px; color:#adb5bd; }
-  #loadingOverlay { position:fixed; inset:0; background:#f4f6f9; z-index:9999; display:flex; align-items:center; justify-content:center; }
-  #errorBox { display:none; }
+  :root {
+    --bg: #f1f4fb;
+    --primary: #4f46e5;
+    --primary-dark: #3730a3;
+    --accent: #0891b2;
+    --danger: #e11d48;
+    --warning: #d97706;
+    --success: #10b981;
+    --info: #0ea5e9;
+    --card-radius: 16px;
+    --text-muted: #6b7280;
+  }
+  * { font-family:'Noto Sans Thai','Segoe UI',Tahoma,sans-serif; }
+  body { background:var(--bg); }
+  .navbar-exec {
+    background:linear-gradient(120deg, var(--primary-dark) 0%, var(--primary) 55%, var(--accent) 100%);
+    box-shadow:0 4px 18px rgba(67,56,202,0.25);
+  }
+  .kpi-card { border:none; border-radius:var(--card-radius); box-shadow:0 4px 16px rgba(31,41,55,0.06); overflow:hidden; }
+  .kpi-icon { width:46px; height:46px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:19px; color:#fff; flex-shrink:0; }
+  .kpi-icon.i-primary { background:linear-gradient(135deg, var(--primary), #7c6ff0); }
+  .kpi-icon.i-danger  { background:linear-gradient(135deg, var(--danger), #f43f5e); }
+  .kpi-icon.i-warning { background:linear-gradient(135deg, var(--warning), #fbbf24); }
+  .kpi-icon.i-info    { background:linear-gradient(135deg, var(--info), #38bdf8); }
+  .kpi-value { font-size:26px; font-weight:800; letter-spacing:-0.3px; }
+  .kpi-label { font-size:12.5px; color:var(--text-muted); font-weight:600; }
+  .chart-card { border:none; border-radius:var(--card-radius); box-shadow:0 4px 16px rgba(31,41,55,0.06); padding:1.1rem 1.2rem; background:#fff; }
+  .card-title-bar { font-size:15px; font-weight:700; color:#1f2937; }
+  .range-pill { font-size:11.5px; color:var(--primary); background:#eef2ff; padding:3px 10px; border-radius:20px; font-weight:600; }
+  .table thead th { font-size:12px; color:var(--text-muted); border-bottom:1px solid #e9ecef; font-weight:700; text-transform:uppercase; letter-spacing:.03em; }
+  .badge-danger-soft { background:#fde8ec; color:var(--danger); font-weight:600; }
+  .badge-warning-soft { background:#fef3e2; color:var(--warning); font-weight:600; }
+  .last-updated { font-size:12px; color:rgba(255,255,255,0.75); }
+  #loadingOverlay { position:fixed; inset:0; background:var(--bg); z-index:9999; display:flex; align-items:center; justify-content:center; }
+  #errorBox { display:none; border-radius:12px; }
   .kpi-clickable { cursor:pointer; transition:transform .15s ease, box-shadow .15s ease; }
-  .kpi-clickable:hover { transform:translateY(-2px); box-shadow:0 6px 16px rgba(0,0,0,0.1); }
-  .kpi-clickable .kpi-hint { font-size:11px; color:#adb5bd; }
-  .drug-detail-card { border-left:4px solid #dee2e6; border-radius:10px; background:#f8f9fa; padding:.75rem 1rem; margin-bottom:.6rem; }
-  .drug-detail-card.danger { border-left-color:#e34948; }
-  .drug-detail-card.warning { border-left-color:#e7a325; }
-  .drug-detail-card.info { border-left-color:#2a78d6; }
-  #fullInventoryBody tr:hover { background:#f8f9fa; }
+  .kpi-clickable:hover { transform:translateY(-3px); box-shadow:0 10px 24px rgba(79,70,229,0.14); }
+  .kpi-clickable .kpi-hint { font-size:11px; color:#a3a9b7; }
+  .drug-detail-card { border-left:4px solid #dee2e6; border-radius:10px; background:#f8f9fc; padding:.75rem 1rem; margin-bottom:.6rem; }
+  .drug-detail-card.danger { border-left-color:var(--danger); }
+  .drug-detail-card.warning { border-left-color:var(--warning); }
+  .drug-detail-card.info { border-left-color:var(--info); }
+  #fullInventoryBody tr:hover { background:#f8f9fc; }
+
+  /* ตัวกรองช่วงวันที่ */
+  .filter-card { border:none; border-radius:var(--card-radius); box-shadow:0 4px 16px rgba(31,41,55,0.06); background:#fff; }
+  .filter-card .form-control { border-radius:10px; }
+  .quick-range-btn { border-radius:20px; font-size:12.5px; font-weight:600; padding:.3rem .9rem; }
+
+  /* ตัวค้นหายา - ให้เด่นขึ้น */
+  .search-wrap { position:relative; max-width:420px; width:100%; }
+  .search-wrap i.search-icon { position:absolute; left:16px; top:50%; transform:translateY(-50%); color:var(--primary); font-size:15px; }
+  #inventorySearch {
+    padding:.65rem 1rem .65rem 2.6rem; border-radius:30px; border:2px solid #e5e9f5; font-size:14.5px;
+    box-shadow:0 2px 8px rgba(79,70,229,0.06); transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  #inventorySearch:focus { border-color:var(--primary); box-shadow:0 0 0 4px rgba(79,70,229,0.12); outline:none; }
+  .search-count { font-size:12px; color:var(--text-muted); margin-top:4px; }
+
+  /* แถบสัดส่วนสต็อกเทียบ Min/Max */
+  .stock-bar { height:5px; border-radius:3px; background:#e9ecef; overflow:hidden; margin-top:4px; min-width:70px; }
+  .stock-bar-fill { height:100%; border-radius:3px; }
+
+  /* แถบสัดส่วนของผู้จ่ายยา */
+  .staff-bar { height:8px; border-radius:4px; background:#eef1f8; overflow:hidden; min-width:90px; }
+  .staff-bar-fill { height:100%; border-radius:4px; background:linear-gradient(90deg, var(--primary), var(--accent)); }
+
+  .export-btn { border-radius:10px; font-weight:600; font-size:13px; }
+
+  /* พื้นที่สำหรับพิมพ์ / Export PDF */
+  #printArea { display:none; }
+  @media print {
+    body * { visibility:hidden; }
+    #printArea, #printArea * { visibility:visible; }
+    #printArea { display:block !important; position:absolute; left:0; top:0; width:100%; padding:20px; }
+    #printArea table { width:100%; border-collapse:collapse; }
+    #printArea th, #printArea td { border:1px solid #ccc; padding:5px 7px; }
+  }
 </style>
 </head>
 <body>
@@ -53,54 +113,134 @@ rt-PA | Antidote | Antivenin </title>
   </div>
 
   <!-- KPI cards -->
-  <div class="row g-3 mb-4">
+  <div class="row g-3 mb-3">
     <div class="col-6 col-md-3">
       <div class="card kpi-card kpi-clickable p-3" onclick="openDetailModal('all')">
-        <div class="kpi-label">จำนวนรายการยาในคลัง</div>
-        <div class="kpi-value text-dark" id="kpiValue">-</div>
-        <div class="kpi-hint"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>ดูรายการ</div>
+        <div class="d-flex align-items-center gap-3">
+          <div class="kpi-icon i-primary"><i class="fa-solid fa-pills"></i></div>
+          <div>
+            <div class="kpi-label">จำนวนรายการยาในคลัง</div>
+            <div class="kpi-value text-dark" id="kpiValue">-</div>
+          </div>
+        </div>
+        <div class="kpi-hint mt-2"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>ดูรายการ</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
       <div class="card kpi-card kpi-clickable p-3" onclick="openDetailModal('low')">
-        <div class="kpi-label">สต็อกต่ำกว่าเกณฑ์</div>
-        <div class="kpi-value text-danger" id="kpiLow">-</div>
-        <div class="kpi-hint"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>ดูรายการ</div>
+        <div class="d-flex align-items-center gap-3">
+          <div class="kpi-icon i-danger"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <div>
+            <div class="kpi-label">สต็อกต่ำกว่าเกณฑ์</div>
+            <div class="kpi-value text-danger" id="kpiLow">-</div>
+          </div>
+        </div>
+        <div class="kpi-hint mt-2"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>ดูรายการ</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
       <div class="card kpi-card kpi-clickable p-3" onclick="openDetailModal('exp')">
-        <div class="kpi-label">ใกล้หมดอายุ (3 เดือน)</div>
-        <div class="kpi-value" style="color:#b7791f" id="kpiExp">-</div>
-        <div class="kpi-hint"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>ดูรายการ</div>
+        <div class="d-flex align-items-center gap-3">
+          <div class="kpi-icon i-warning"><i class="fa-solid fa-calendar-xmark"></i></div>
+          <div>
+            <div class="kpi-label">ใกล้หมดอายุ (3 เดือน)</div>
+            <div class="kpi-value" style="color:var(--warning)" id="kpiExp">-</div>
+          </div>
+        </div>
+        <div class="kpi-hint mt-2"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>ดูรายการ</div>
       </div>
     </div>
     <div class="col-6 col-md-3">
       <div class="card kpi-card kpi-clickable p-3" onclick="openDetailModal('today')">
-        <div class="kpi-label">ยอดจ่ายยาวันนี้</div>
-        <div class="kpi-value text-dark" id="kpiToday">-</div>
-        <div class="kpi-hint"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>ดูรายการ</div>
+        <div class="d-flex align-items-center gap-3">
+          <div class="kpi-icon i-info"><i class="fa-solid fa-syringe"></i></div>
+          <div>
+            <div class="kpi-label">ยอดจ่ายยาวันนี้</div>
+            <div class="kpi-value text-dark" id="kpiToday">-</div>
+          </div>
+        </div>
+        <div class="kpi-hint mt-2"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>ดูรายการ</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ตัวกรองช่วงวันที่แบบเลือกเอง -->
+  <div class="row g-3 mb-3">
+    <div class="col-12">
+      <div class="card filter-card p-3">
+        <div class="d-flex flex-wrap align-items-end gap-3">
+          <div>
+            <label class="form-label small fw-bold text-muted mb-1">วันที่เริ่มต้น</label>
+            <input type="date" id="dateRangeStart" class="form-control form-control-sm">
+          </div>
+          <div>
+            <label class="form-label small fw-bold text-muted mb-1">วันที่สิ้นสุด</label>
+            <input type="date" id="dateRangeEnd" class="form-control form-control-sm">
+          </div>
+          <button class="btn btn-primary btn-sm export-btn" onclick="applyDateRange()">
+            <i class="fa-solid fa-filter me-1"></i>แสดงผล
+          </button>
+          <div class="vr d-none d-md-block"></div>
+          <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-outline-secondary quick-range-btn" onclick="setQuickRange(7)">7 วัน</button>
+            <button class="btn btn-outline-secondary quick-range-btn" onclick="setQuickRange(30)">30 วัน</button>
+            <button class="btn btn-outline-secondary quick-range-btn" onclick="setQuickRange(90)">90 วัน</button>
+            <button class="btn btn-outline-secondary quick-range-btn" onclick="setThisMonthRange()">เดือนนี้</button>
+          </div>
+          <div class="ms-auto small text-muted">
+            <i class="fa-regular fa-calendar me-1"></i>ช่วงที่แสดงผล: <span class="fw-bold" id="rangeSummaryText">-</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Charts -->
-  <div class="row g-3 mb-4">
+  <div class="row g-3 mb-3">
     <div class="col-lg-7">
       <div class="chart-card h-100">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <span class="fw-bold">ยอดจ่ายยารายวัน (30 วันล่าสุด)</span>
+        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+          <span class="card-title-bar"><i class="fa-solid fa-chart-line me-2 text-primary"></i>ยอดจ่ายยารายวัน</span>
+          <span class="range-pill" id="dailyChartRangeLabel">-</span>
         </div>
         <div style="position:relative; height:280px;">
-          <canvas id="dailyChart" role="img" aria-label="กราฟเส้นแสดงยอดจ่ายยารายวันย้อนหลัง 30 วัน"></canvas>
+          <canvas id="dailyChart" role="img" aria-label="กราฟเส้นแสดงยอดจ่ายยารายวันตามช่วงวันที่ที่เลือก"></canvas>
         </div>
       </div>
     </div>
     <div class="col-lg-5">
       <div class="chart-card h-100">
-        <div class="fw-bold mb-2">สต็อกต่ำกว่าเกณฑ์ (10 อันดับ)</div>
+        <div class="card-title-bar mb-2">สต็อกต่ำกว่าเกณฑ์ (10 อันดับ)</div>
         <div style="position:relative; height:280px;">
           <canvas id="lowStockChart" role="img" aria-label="กราฟแท่งแสดงยาที่สต็อกต่ำกว่าเกณฑ์ 10 อันดับแรก"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- เปรียบเทียบเดือนนี้ vs เดือนก่อน + สรุปแยกตามผู้จ่ายยา -->
+  <div class="row g-3 mb-3">
+    <div class="col-lg-6">
+      <div class="chart-card h-100">
+        <div class="card-title-bar mb-2"><i class="fa-solid fa-scale-balanced me-2 text-primary"></i>เปรียบเทียบยอดจ่ายยา: เดือนนี้ vs เดือนก่อน</div>
+        <div style="position:relative; height:280px;">
+          <canvas id="monthCompareChart" role="img" aria-label="กราฟเปรียบเทียบยอดจ่ายยาเดือนนี้กับเดือนก่อน"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="chart-card h-100">
+        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+          <span class="card-title-bar"><i class="fa-solid fa-user-nurse me-2 text-primary"></i>สรุปแยกตามผู้จ่ายยา (staff)</span>
+          <span class="range-pill" id="staffSummaryRangeLabel">-</span>
+        </div>
+        <div class="table-responsive" style="max-height:280px; overflow-y:auto;">
+          <table class="table table-sm align-middle mb-0">
+            <thead class="sticky-top bg-white"><tr>
+              <th>#</th><th>ผู้จ่ายยา</th><th class="text-end">จำนวนครั้ง</th><th class="text-end">จำนวนหน่วย</th><th>สัดส่วน</th>
+            </tr></thead>
+            <tbody id="staffSummaryBody"><tr><td colspan="5" class="text-center text-muted py-3">กำลังโหลด...</td></tr></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -120,7 +260,10 @@ rt-PA | Antidote | Antivenin </title>
     </div>
     <div class="col-lg-6">
       <div class="chart-card h-100">
-        <div class="fw-bold mb-3"><i class="fa-solid fa-ranking-star me-2 text-primary"></i>ยาที่จ่ายมากที่สุด (30 วัน)</div>
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <span class="fw-bold"><i class="fa-solid fa-ranking-star me-2 text-primary"></i>ยาที่จ่ายมากที่สุด</span>
+          <span class="range-pill" id="topDrugsRangeLabel">-</span>
+        </div>
         <div class="table-responsive">
           <table class="table table-sm align-middle mb-0">
             <thead><tr><th>ชื่อยา</th><th class="text-end">จำนวนที่จ่าย</th></tr></thead>
@@ -134,9 +277,23 @@ rt-PA | Antidote | Antivenin </title>
   <div class="row g-3 mt-1">
     <div class="col-12">
       <div class="chart-card">
-        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
           <span class="fw-bold"><i class="fa-solid fa-boxes-stacked me-2 text-primary"></i>คลังยาทั้งหมด</span>
-          <input type="text" id="inventorySearch" class="form-control form-control-sm" style="max-width:280px;" placeholder="ค้นหาชื่อยา...">
+          <div class="d-flex gap-2">
+            <button class="btn btn-success btn-sm export-btn" onclick="exportInventoryExcel()">
+              <i class="fa-solid fa-file-excel me-1"></i>Export Excel
+            </button>
+            <button class="btn btn-danger btn-sm export-btn" onclick="exportInventoryPDF()">
+              <i class="fa-solid fa-file-pdf me-1"></i>Export PDF
+            </button>
+          </div>
+        </div>
+        <div class="mb-3">
+          <div class="search-wrap">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="inventorySearch" class="form-control" placeholder="ค้นหาชื่อยา หรือความแรง...">
+          </div>
+          <div class="search-count" id="inventoryCount"></div>
         </div>
         <div class="table-responsive" style="max-height:420px; overflow-y:auto;">
           <table class="table table-sm align-middle mb-0">
@@ -165,9 +322,14 @@ rt-PA | Antidote | Antivenin </title>
     </div>
   </div>
 </div>
+
+<!-- พื้นที่ซ่อนไว้สำหรับ Export PDF (ใช้ระบบพิมพ์ของเบราว์เซอร์ เพื่อให้ภาษาไทยแสดงผลถูกต้อง) -->
+<div id="printArea"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 /* ==========================================================================
    CONFIG - แก้ตรงนี้ให้ตรงกับโปรเจกต์ Supabase จริงของคุณ
@@ -181,11 +343,18 @@ const TABLE_LOGS   = "records";
 
 // records มีทั้ง time และ created_at — ใช้ "time" เป็นเวลาจ่ายยาจริง (fallback เป็น created_at ถ้าไม่มี)
 const LOG_TIME_FIELD = "time";
+
+// คอลัมน์ "ผู้จ่ายยา" ใน records — ถ้าใน schema จริงชื่อคอลัมน์ไม่ใช่ "staff"
+// (เช่น "staff_name", "pharmacist", "user_name") ให้แก้ตรงนี้ค่าเดียว
+// หากคอลัมน์นี้ไม่มีอยู่จริงในตาราง ระบบจะดึงข้อมูลแบบไม่มีผู้จ่ายยาโดยอัตโนมัติ (fallback) และแสดง "ไม่ระบุ" แทน
+const LOG_STAFF_FIELD = "staff";
 /* ========================================================================== */
 
 const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const REFRESH_MS = 5 * 60 * 1000; // auto-refresh ทุก 5 นาที
+
+let STAFF_FIELD_AVAILABLE = true;
 
 function showError(msg) {
   document.getElementById("errorBox").style.display = "block";
@@ -218,30 +387,111 @@ function parseFlexibleDate(str) {
   return isNaN(fallback) ? null : fallback;
 }
 
+/* ==========================================================================
+   ตัวกรองช่วงวันที่แบบเลือกเอง
+   ========================================================================== */
+let RANGE_START, RANGE_END;
+
+function toInputDate(d) {
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function initDateRange() {
+  const end = new Date(); end.setHours(23, 59, 59, 999);
+  const start = new Date(); start.setDate(start.getDate() - 29); start.setHours(0, 0, 0, 0);
+  RANGE_START = start; RANGE_END = end;
+  document.getElementById("dateRangeStart").value = toInputDate(start);
+  document.getElementById("dateRangeEnd").value = toInputDate(end);
+  renderRangeLabel();
+}
+
+function applyDateRange() {
+  const startVal = document.getElementById("dateRangeStart").value;
+  const endVal = document.getElementById("dateRangeEnd").value;
+  if (!startVal || !endVal) return;
+  const start = new Date(startVal + "T00:00:00");
+  const end = new Date(endVal + "T23:59:59");
+  if (start > end) {
+    alert("วันที่เริ่มต้นต้องไม่เกินวันที่สิ้นสุด");
+    return;
+  }
+  RANGE_START = start; RANGE_END = end;
+  renderRangeLabel();
+  renderDailyChart(CURRENT_LOGS, RANGE_START, RANGE_END);
+  renderTopDrugsTable(CURRENT_LOGS, RANGE_START, RANGE_END);
+  renderStaffSummary(CURRENT_LOGS, RANGE_START, RANGE_END);
+}
+
+function setQuickRange(days) {
+  const end = new Date(); end.setHours(23, 59, 59, 999);
+  const start = new Date(); start.setDate(start.getDate() - (days - 1)); start.setHours(0, 0, 0, 0);
+  document.getElementById("dateRangeStart").value = toInputDate(start);
+  document.getElementById("dateRangeEnd").value = toInputDate(end);
+  applyDateRange();
+}
+
+function setThisMonthRange() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end = new Date(); end.setHours(23, 59, 59, 999);
+  document.getElementById("dateRangeStart").value = toInputDate(start);
+  document.getElementById("dateRangeEnd").value = toInputDate(end);
+  applyDateRange();
+}
+
+function renderRangeLabel() {
+  const label = `${formatDateTH(RANGE_START)} - ${formatDateTH(RANGE_END)}`;
+  document.getElementById("dailyChartRangeLabel").textContent = label;
+  document.getElementById("topDrugsRangeLabel").textContent = label;
+  document.getElementById("staffSummaryRangeLabel").textContent = label;
+  document.getElementById("rangeSummaryText").textContent = label;
+}
+
 let dailyChartInstance = null;
 let lowStockChartInstance = null;
+let monthCompareChartInstance = null;
 let CURRENT_DRUGS = [];
 let CURRENT_LOGS = [];
+let DISPLAYED_INVENTORY = [];
 
 async function loadDashboard() {
   try {
-    // ดึง drug_stock, drug_master, records แยกกัน แล้วเอามา join กันเองในโค้ด
+    // ดึง drug_stock, drug_master แยกกัน แล้วเอามา join กันเองในโค้ด
     // (ไม่ใช้ auto-join ของ Supabase เพราะต้องพึ่ง Foreign Key constraint ในฐานข้อมูล)
     const [
       { data: stockRows, error: stockErr },
-      { data: masterRows, error: masterErr },
-      { data: logRows, error: logsErr }
+      { data: masterRows, error: masterErr }
     ] = await Promise.all([
       sbClient.from(TABLE_STOCK).select("id, drug_id, lot, mfg, exp, stock, min_stock, max_stock, created_at"),
-      sbClient.from(TABLE_MASTER).select("drug_id, name, strength, form"),
-      // ดึงเฉพาะคอลัมน์ที่จำเป็น "ไม่รวม" pt_name และ pt_hn (ข้อมูลผู้ป่วย) เพื่อไม่ให้ข้อมูลผู้ป่วยหลุดไปที่ browser
-      sbClient.from(TABLE_LOGS)
-        .select("id, time, name, strength, form, qty, drug_id, created_at")
-        .limit(5000)
+      sbClient.from(TABLE_MASTER).select("drug_id, name, strength, form")
     ]);
 
     if (stockErr) throw new Error("โหลดข้อมูลสต็อกยาไม่สำเร็จ: " + stockErr.message);
     if (masterErr) throw new Error("โหลดข้อมูลรายชื่อยาไม่สำเร็จ: " + masterErr.message);
+
+    // ดึง records — พยายามดึงคอลัมน์ผู้จ่ายยา (staff) ด้วย ถ้าคอลัมน์ไม่มีจริงจะ fallback อัตโนมัติ
+    // (ไม่รวม pt_name และ pt_hn (ข้อมูลผู้ป่วย) เพื่อไม่ให้ข้อมูลผู้ป่วยหลุดไปที่ browser)
+    let logRows, logsErr;
+    const primaryLogs = await sbClient.from(TABLE_LOGS)
+      .select(`id, time, name, strength, form, qty, drug_id, created_at, ${LOG_STAFF_FIELD}`)
+      .limit(5000);
+
+    if (primaryLogs.error && /column .* does not exist/i.test(primaryLogs.error.message || "")) {
+      STAFF_FIELD_AVAILABLE = false;
+      const fallbackLogs = await sbClient.from(TABLE_LOGS)
+        .select("id, time, name, strength, form, qty, drug_id, created_at")
+        .limit(5000);
+      logRows = fallbackLogs.data;
+      logsErr = fallbackLogs.error;
+    } else {
+      STAFF_FIELD_AVAILABLE = true;
+      logRows = primaryLogs.data;
+      logsErr = primaryLogs.error;
+    }
+
     if (logsErr) throw new Error("โหลดประวัติจ่ายยาไม่สำเร็จ: " + logsErr.message);
 
     // ทำ lookup table จาก drug_master โดยใช้ drug_id เป็น key
@@ -249,7 +499,7 @@ async function loadDashboard() {
     (masterRows || []).forEach(m => { masterByDrugId[m.drug_id] = m; });
 
     // join drug_stock กับ drug_master เองใน JS ผ่าน drug_id
-    const drugs = (stockRows || []).map(d => {
+    const allDrugs = (stockRows || []).map(d => {
       const master = masterByDrugId[d.drug_id] || {};
       return {
         ...d,
@@ -259,17 +509,25 @@ async function loadDashboard() {
       };
     });
 
+    // ยาที่คงเหลือเป็น 0 จะไม่แสดงในแดชบอร์ดทั้งหมด (KPI, กราฟ, ตาราง, modal)
+    const drugs = allDrugs.filter(d => Number(d.stock) > 0);
+
     // records มีชื่อ/ความแรงในตัวเองอยู่แล้ว (denormalized) ใช้ time เป็นหลัก fallback created_at
     const logs = (logRows || []).map(l => ({
       ...l,
+      staff: (STAFF_FIELD_AVAILABLE && l[LOG_STAFF_FIELD]) ? l[LOG_STAFF_FIELD] : "ไม่ระบุ",
       _time: parseFlexibleDate(l[LOG_TIME_FIELD] || l.created_at)
     }));
 
+    if (!RANGE_START || !RANGE_END) initDateRange();
+
     renderKpis(drugs, logs);
-    renderDailyChart(logs);
+    renderDailyChart(logs, RANGE_START, RANGE_END);
     renderLowStockChart(drugs);
+    renderMonthComparisonChart(logs);
     renderExpiringTable(drugs);
-    renderTopDrugsTable(logs);
+    renderTopDrugsTable(logs, RANGE_START, RANGE_END);
+    renderStaffSummary(logs, RANGE_START, RANGE_END);
     renderFullInventory(drugs);
 
     // เก็บไว้ใช้กับ modal รายละเอียด (คลิกการ์ด KPI) และช่องค้นหา โดยไม่ต้องดึงข้อมูลซ้ำ
@@ -289,7 +547,7 @@ async function loadDashboard() {
 }
 
 function renderKpis(drugs, logs) {
-  // ไม่มีคอลัมน์ราคาใน schema นี้ เลยแสดงจำนวนรายการยาในคลังแทนมูลค่า
+  // ไม่มีคอลัมน์ราคาใน schema นี้ เลยแสดงจำนวนรายการยาในคลังแทนมูลค่า (ไม่รวมยาที่คงเหลือ 0)
   document.getElementById("kpiValue").textContent = drugs.length.toLocaleString("th-TH") + " รายการ";
 
   const lowCount = drugs.filter(d => Number(d.stock) <= Number(d.min_stock)).length;
@@ -307,18 +565,24 @@ function renderKpis(drugs, logs) {
   document.getElementById("kpiToday").textContent = todayCount.toLocaleString("th-TH") + " หน่วย";
 }
 
-function renderDailyChart(logs) {
+function renderDailyChart(logs, rangeStart, rangeEnd) {
   const days = [];
   const counts = [];
-  for (let i = 29; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const key = d.toLocaleDateString("th-TH", { day: "2-digit", month: "2-digit" });
+
+  const start = new Date(rangeStart); start.setHours(0, 0, 0, 0);
+  const end = new Date(rangeEnd); end.setHours(0, 0, 0, 0);
+
+  const cur = new Date(start);
+  let guard = 0;
+  while (cur <= end && guard < 730) { // ป้องกันช่วงวันที่ใหญ่เกินไป
+    const key = cur.toLocaleDateString("th-TH", { day: "2-digit", month: "2-digit" });
     days.push(key);
     const dayTotal = logs
-      .filter(l => l._time && l._time.toDateString() === d.toDateString())
+      .filter(l => l._time && l._time.toDateString() === cur.toDateString())
       .reduce((sum, l) => sum + (Number(l.qty) || 0), 0);
     counts.push(dayTotal);
+    cur.setDate(cur.getDate() + 1);
+    guard++;
   }
 
   const ctx = document.getElementById("dailyChart");
@@ -329,12 +593,12 @@ function renderDailyChart(logs) {
       labels: days,
       datasets: [{
         data: counts,
-        borderColor: "#2a78d6",
-        backgroundColor: "rgba(42,120,214,0.1)",
+        borderColor: "#4f46e5",
+        backgroundColor: "rgba(79,70,229,0.1)",
         fill: true,
         tension: 0.3,
         pointRadius: 0,
-        borderWidth: 2
+        borderWidth: 2.5
       }]
     },
     options: {
@@ -343,7 +607,7 @@ function renderDailyChart(logs) {
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { display: false }, ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 15 } },
-        y: { grid: { color: "#e9ecef" }, beginAtZero: true }
+        y: { grid: { color: "#eef0f5" }, beginAtZero: true }
       }
     }
   });
@@ -368,7 +632,7 @@ function renderLowStockChart(drugs) {
     type: "bar",
     data: {
       labels: low.map(d => d.name),
-      datasets: [{ data: low.map(d => d.deficit), backgroundColor: "#e34948", borderRadius: 4 }]
+      datasets: [{ data: low.map(d => d.deficit), backgroundColor: "#e11d48", borderRadius: 4 }]
     },
     options: {
       indexAxis: "y",
@@ -376,8 +640,75 @@ function renderLowStockChart(drugs) {
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
-        x: { grid: { color: "#e9ecef" }, beginAtZero: true, title: { display: true, text: "ขาดจากเกณฑ์ขั้นต่ำ" } },
+        x: { grid: { color: "#eef0f5" }, beginAtZero: true, title: { display: true, text: "ขาดจากเกณฑ์ขั้นต่ำ" } },
         y: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+/* ==========================================================================
+   กราฟเปรียบเทียบยอดจ่ายยา: เดือนนี้ vs เดือนก่อน (ไม่ผูกกับตัวกรองช่วงวันที่)
+   ========================================================================== */
+function renderMonthComparisonChart(logs) {
+  const now = new Date();
+  const curMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const daysInCur = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const daysInPrev = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+  const maxDays = Math.max(daysInCur, daysInPrev);
+
+  // จัดกลุ่มยอดจ่ายยาล่วงหน้าตามวันที่ ให้ได้ประสิทธิภาพดีกว่าการวน filter ซ้ำ
+  const curMap = {};
+  const prevMap = {};
+  logs.forEach(l => {
+    if (!l._time) return;
+    const y = l._time.getFullYear(), m = l._time.getMonth(), d = l._time.getDate();
+    const qty = Number(l.qty) || 0;
+    if (y === curMonthStart.getFullYear() && m === curMonthStart.getMonth()) {
+      curMap[d] = (curMap[d] || 0) + qty;
+    } else if (y === prevMonthStart.getFullYear() && m === prevMonthStart.getMonth()) {
+      prevMap[d] = (prevMap[d] || 0) + qty;
+    }
+  });
+
+  const labels = [];
+  const curData = [];
+  const prevData = [];
+  for (let day = 1; day <= maxDays; day++) {
+    labels.push(String(day));
+    curData.push(day <= daysInCur ? (curMap[day] || 0) : null);
+    prevData.push(day <= daysInPrev ? (prevMap[day] || 0) : null);
+  }
+
+  const ctx = document.getElementById("monthCompareChart");
+  if (monthCompareChartInstance) monthCompareChartInstance.destroy();
+  monthCompareChartInstance = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: curMonthStart.toLocaleDateString("th-TH", { month: "long", year: "numeric" }),
+          data: curData,
+          backgroundColor: "#4f46e5",
+          borderRadius: 4
+        },
+        {
+          label: prevMonthStart.toLocaleDateString("th-TH", { month: "long", year: "numeric" }),
+          data: prevData,
+          backgroundColor: "#c7cbe8",
+          borderRadius: 4
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: true, position: "top", labels: { boxWidth: 12, font: { size: 11 } } } },
+      scales: {
+        x: { grid: { display: false }, title: { display: true, text: "วันที่ในเดือน" } },
+        y: { grid: { color: "#eef0f5" }, beginAtZero: true }
       }
     }
   });
@@ -407,13 +738,10 @@ function renderExpiringTable(drugs) {
   `).join("");
 }
 
-function renderTopDrugsTable(logs) {
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
+function renderTopDrugsTable(logs, rangeStart, rangeEnd) {
   const totals = {};
   logs
-    .filter(l => l._time && l._time >= thirtyDaysAgo)
+    .filter(l => l._time && l._time >= rangeStart && l._time <= rangeEnd)
     .forEach(l => {
       const name = l.name || "-";
       totals[name] = (totals[name] || 0) + (Number(l.qty) || 0);
@@ -425,7 +753,7 @@ function renderTopDrugsTable(logs) {
 
   const body = document.getElementById("topDrugTableBody");
   if (top.length === 0) {
-    body.innerHTML = '<tr><td colspan="2" class="text-center text-muted py-3">ไม่มีข้อมูล</td></tr>';
+    body.innerHTML = '<tr><td colspan="2" class="text-center text-muted py-3">ไม่มีข้อมูลในช่วงที่เลือก</td></tr>';
     return;
   }
 
@@ -435,11 +763,65 @@ function renderTopDrugsTable(logs) {
 }
 
 /* ==========================================================================
-   ตารางคลังยาทั้งหมด (ชื่อยา, ความแรง, คงเหลือ, วันหมดอายุ) + ช่องค้นหา
+   สรุปแยกตามผู้จ่ายยา (staff) ตามช่วงวันที่ที่เลือก
    ========================================================================== */
+function renderStaffSummary(logs, rangeStart, rangeEnd) {
+  const filtered = logs.filter(l => l._time && l._time >= rangeStart && l._time <= rangeEnd);
+
+  const totals = {};
+  filtered.forEach(l => {
+    const staff = l.staff || "ไม่ระบุ";
+    if (!totals[staff]) totals[staff] = { qty: 0, count: 0 };
+    totals[staff].qty += Number(l.qty) || 0;
+    totals[staff].count += 1;
+  });
+
+  const arr = Object.entries(totals)
+    .map(([staff, v]) => ({ staff, ...v }))
+    .sort((a, b) => b.qty - a.qty);
+
+  const body = document.getElementById("staffSummaryBody");
+  if (arr.length === 0) {
+    body.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">ไม่มีข้อมูลในช่วงที่เลือก</td></tr>';
+    return;
+  }
+
+  const grandTotal = arr.reduce((s, x) => s + x.qty, 0) || 1;
+
+  body.innerHTML = arr.map((s, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td>${s.staff}</td>
+      <td class="text-end">${s.count.toLocaleString("th-TH")}</td>
+      <td class="text-end fw-bold">${s.qty.toLocaleString("th-TH")}</td>
+      <td>
+        <div class="staff-bar"><div class="staff-bar-fill" style="width:${Math.round(s.qty / grandTotal * 100)}%"></div></div>
+      </td>
+    </tr>
+  `).join("");
+}
+
+/* ==========================================================================
+   ตารางคลังยาทั้งหมด (ชื่อยา, ความแรง, คงเหลือ, Min/Max, วันหมดอายุ) + ช่องค้นหา
+   ========================================================================== */
+function stockRatioBar(stock, min, max) {
+  const s = Number(stock), mn = Number(min), mx = Number(max);
+  let pct = 0;
+  if (!isNaN(mx) && mx > 0) pct = Math.min(100, Math.max(0, (s / mx) * 100));
+
+  let color = "#10b981"; // ปกติ - เขียว
+  if (!isNaN(mn) && s <= mn) color = "#e11d48"; // ต่ำกว่าเกณฑ์ - แดง
+  else if (!isNaN(mx) && mx > 0 && s >= mx) color = "#0ea5e9"; // เต็ม/เกิน Max - ฟ้า
+
+  return `<div class="stock-bar"><div class="stock-bar-fill" style="width:${pct}%;background:${color}"></div></div>`;
+}
+
 function renderFullInventory(drugs) {
   const list = [...drugs].sort((a, b) => (a.name || "").localeCompare(b.name || "", "th"));
   const body = document.getElementById("fullInventoryBody");
+  DISPLAYED_INVENTORY = list;
+
+  document.getElementById("inventoryCount").textContent = `แสดง ${list.length.toLocaleString("th-TH")} รายการ`;
 
   if (list.length === 0) {
     body.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">ไม่มีข้อมูลยาในคลัง</td></tr>';
@@ -454,7 +836,10 @@ function renderFullInventory(drugs) {
       <td>${d.strength || "-"}</td>
       <td><span class="badge bg-secondary">${d.lot || "-"}</span></td>
       <td class="text-end fw-bold ${isLow ? "text-danger" : ""}">${d.stock}</td>
-      <td class="text-end text-muted">${d.min_stock ?? "-"} / ${d.max_stock ?? "-"}</td>
+      <td class="text-end text-muted">
+        ${d.min_stock ?? "-"} / ${d.max_stock ?? "-"}
+        ${stockRatioBar(d.stock, d.min_stock, d.max_stock)}
+      </td>
       <td class="text-end">${formatDateTH(d.exp)}</td>
     </tr>`;
   }).join("");
@@ -467,6 +852,62 @@ document.getElementById("inventorySearch").addEventListener("input", (e) => {
     : CURRENT_DRUGS;
   renderFullInventory(filtered);
 });
+
+/* ==========================================================================
+   Export ตารางคลังยาทั้งหมด เป็น Excel และ PDF
+   (แสดงเฉพาะรายการที่กำลังแสดงผลอยู่ ณ ขณะนั้น รวมผลจากการค้นหาด้วย)
+   ========================================================================== */
+function exportInventoryExcel() {
+  if (typeof XLSX === "undefined") {
+    alert("ไม่สามารถโหลดไลบรารี Excel ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต");
+    return;
+  }
+  const rows = DISPLAYED_INVENTORY.map(d => ({
+    "ชื่อยา": d.name,
+    "ความแรง": d.strength || "-",
+    "Lot": d.lot || "-",
+    "คงเหลือ": d.stock,
+    "Min": d.min_stock ?? "-",
+    "Max": d.max_stock ?? "-",
+    "วันหมดอายุ": formatDateTH(d.exp)
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "คลังยา");
+  const dateTag = new Date().toISOString().slice(0, 10);
+  XLSX.writeFile(wb, `คลังยา_${dateTag}.xlsx`);
+}
+
+function exportInventoryPDF() {
+  const printArea = document.getElementById("printArea");
+  const rows = DISPLAYED_INVENTORY.map(d => `
+    <tr>
+      <td>${d.name}${d.strength ? " (" + d.strength + ")" : ""}</td>
+      <td>${d.lot || "-"}</td>
+      <td style="text-align:right;">${d.stock}</td>
+      <td style="text-align:right;">${d.min_stock ?? "-"} / ${d.max_stock ?? "-"}</td>
+      <td style="text-align:right;">${formatDateTH(d.exp)}</td>
+    </tr>`).join("");
+
+  printArea.innerHTML = `
+    <h4 style="margin-bottom:2px;">คลังยาทั้งหมด</h4>
+    <div style="font-size:12px;color:#666;margin-bottom:10px;">พิมพ์เมื่อ ${new Date().toLocaleString("th-TH")} · ทั้งหมด ${DISPLAYED_INVENTORY.length.toLocaleString("th-TH")} รายการ</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="text-align:left;">ชื่อยา</th>
+          <th style="text-align:left;">Lot</th>
+          <th style="text-align:right;">คงเหลือ</th>
+          <th style="text-align:right;">Min/Max</th>
+          <th style="text-align:right;">วันหมดอายุ</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+
+  // เปิดหน้าต่างพิมพ์ของเบราว์เซอร์ — ผู้ใช้เลือก "บันทึกเป็น PDF" ได้จากตัวเลือกปลายทางการพิมพ์
+  window.print();
+}
 
 /* ==========================================================================
    Modal รายละเอียด: คลิกการ์ด KPI แล้วเด้งแสดงรายชื่อยาจริง
@@ -524,7 +965,7 @@ function openDetailModal(type) {
         <div class="d-flex justify-content-between">
           <div>
             <div class="fw-bold">${l.name}${l.strength ? ` (${l.strength})` : ""}</div>
-            <div class="text-muted small">${l._time.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} น.</div>
+            <div class="text-muted small">${l._time.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} น. · ผู้จ่ายยา: ${l.staff || "ไม่ระบุ"}</div>
           </div>
           <div class="text-end">
             <div class="fw-bold fs-5">${l.qty}</div>
@@ -539,6 +980,7 @@ function openDetailModal(type) {
   new bootstrap.Modal(document.getElementById("detailModal")).show();
 }
 
+initDateRange();
 loadDashboard();
 setInterval(loadDashboard, REFRESH_MS);
 </script>
