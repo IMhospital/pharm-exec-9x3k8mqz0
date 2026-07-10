@@ -242,7 +242,7 @@ rt-PA | Antidote </span>
     <div class="col-lg-5">
       <div class="chart-card h-100">
         <div class="card-title-bar mb-2">สต็อกต่ำกว่าเกณฑ์ (10 อันดับ)</div>
-        <div class="chart-canvas-wrap">
+        <div class="chart-canvas-wrap" id="lowStockChartWrap">
           <canvas id="lowStockChart" role="img" aria-label="กราฟแท่งแสดงยาที่สต็อกต่ำกว่าเกณฑ์ 10 อันดับแรก"></canvas>
         </div>
       </div>
@@ -342,7 +342,7 @@ rt-PA | Antidote </span>
   <footer class="app-footer">
     <div class="footer-brand"><i class="fa-solid fa-chart-line me-1"></i>แดชบอร์ดผู้บริหาร - คลังยา</div>
     <div class="mt-1">ข้อมูลอัปเดตอัตโนมัติทุก 5 นาที · ระบบสำหรับใช้งานภายในองค์กรเท่านั้น</div>
-    <div class="mt-1">© <span id="footerYear"></span> ฝ่ายเภสัชกรรม · สงวนลิขสิทธิ์ทุกประการ</div>
+    <div class="mt-1">© <span id="footerYear"></span> ฝ่ายเภสัชกรรม พัฒนาโดย : สายัญ ธุนันทา</div>
   </footer>
 </div>
 
@@ -674,13 +674,22 @@ function renderLowStockChart(drugs) {
     .sort((a, b) => b.deficit - a.deficit)
     .slice(0, 10);
 
-  const ctx = document.getElementById("lowStockChart");
-  if (lowStockChartInstance) lowStockChartInstance.destroy();
+  const wrap = document.getElementById("lowStockChartWrap");
+  if (lowStockChartInstance) { lowStockChartInstance.destroy(); lowStockChartInstance = null; }
+
+  if (!wrap) return; // ป้องกัน error หากยังไม่มี element นี้ใน DOM
 
   if (low.length === 0) {
-    ctx.parentElement.innerHTML = '<div class="text-center text-muted py-5"><i class="fa-solid fa-circle-check fa-2x mb-2 text-success"></i><br>ไม่มีรายการต่ำกว่าเกณฑ์</div>';
+    wrap.innerHTML = '<div class="text-center text-muted py-5"><i class="fa-solid fa-circle-check fa-2x mb-2 text-success"></i><br>ไม่มีรายการต่ำกว่าเกณฑ์</div>';
     return;
   }
+
+  // ถ้าครั้งก่อนถูกแทนที่ด้วยข้อความ "ไม่มีรายการ" ให้สร้าง canvas กลับมาใหม่ก่อน
+  if (!document.getElementById("lowStockChart")) {
+    wrap.innerHTML = '<canvas id="lowStockChart" role="img" aria-label="กราฟแท่งแสดงยาที่สต็อกต่ำกว่าเกณฑ์ 10 อันดับแรก"></canvas>';
+  }
+  const ctx = document.getElementById("lowStockChart");
+  if (!ctx) return; // ป้องกัน error ซ้ำอีกชั้น
 
   lowStockChartInstance = new Chart(ctx, {
     type: "bar",
