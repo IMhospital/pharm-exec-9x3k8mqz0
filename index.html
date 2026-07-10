@@ -161,16 +161,30 @@ rt-PA | Antidote </title>
 <div id="loginScreen">
   <div class="login-card">
     <div class="login-icon"><i class="fa-solid fa-lock"></i></div>
-    <div class="login-title">แดชบอร์ด - ระบบบันทึกจ่ายยา</div>
-    <div class="login-subtitle">กรุณาเข้าสู่ระบบด้วยอีเมลที่ได้รับอนุญาต</div>
+    <div class="login-title">แดชบอร์ด - ระบบบันทึกจ่ายยา rt-PA</div>
+    <div class="login-subtitle">สำหรับบุคลากรภายในเท่านั้น กรุณาเข้าสู่ระบบด้วยอีเมลที่ได้รับอนุญาต</div>
 
+    <!-- ขั้นตอนที่ 1: กรอกอีเมล -->
     <form id="loginForm">
       <label class="form-label small fw-semibold text-muted">อีเมล</label>
       <input type="email" class="form-control mb-3" id="loginEmail" placeholder="name@hospital.go.th" required autocomplete="email">
       <button type="submit" class="btn btn-primary w-100 btn-login" id="loginSubmitBtn">
-        <i class="fa-solid fa-paper-plane me-2"></i>ส่งลิงก์เข้าสู่ระบบ
+        <i class="fa-solid fa-paper-plane me-2"></i>ส่งรหัสเข้าสู่ระบบ
       </button>
     </form>
+
+    <!-- ขั้นตอนที่ 2: กรอกรหัส OTP 6 หลักจากอีเมล -->
+    <form id="otpForm" style="display:none;">
+      <label class="form-label small fw-semibold text-muted">รหัส 6 หลักจากอีเมล <span id="otpEmailTarget" class="fw-normal text-muted"></span></label>
+      <input type="text" class="form-control mb-3 text-center" id="loginOtp" placeholder="000000" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" required style="letter-spacing:.4em; font-weight:700; font-size:18px;">
+      <button type="submit" class="btn btn-primary w-100 btn-login mb-2" id="otpSubmitBtn">
+        <i class="fa-solid fa-right-to-bracket me-2"></i>เข้าสู่ระบบ
+      </button>
+      <button type="button" class="btn btn-link w-100 btn-sm" id="otpBackBtn">
+        <i class="fa-solid fa-arrow-left me-1"></i>เปลี่ยนอีเมล / ส่งรหัสใหม่
+      </button>
+    </form>
+
     <div id="loginStatus"></div>
   </div>
 </div>
@@ -471,7 +485,9 @@ const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const REFRESH_MS = 5 * 60 * 1000; // auto-refresh ทุก 5 นาที
 
 /* ==========================================================================
-   AUTH GATE — Supabase Auth (Magic Link)
+   AUTH GATE — Supabase Auth (Email OTP 6 หลัก)
+   ผู้ใช้กรอกอีเมล -> ระบบส่งรหัส 6 หลักไปทางอีเมล -> ผู้ใช้พิมพ์รหัสในหน้านี้
+   เพื่อยืนยันตัวตน โดยไม่ต้องออกจากหน้าเว็บไปคลิกลิงก์ในอีเมล
    หน้าเว็บนี้จะไม่โหลด/แสดงข้อมูลใดๆ จนกว่าจะยืนยันตัวตนผ่าน Supabase Auth แล้ว
    หมายเหตุสำคัญ: หน้าจอ Login นี้ป้องกันการ "เห็น" ข้อมูลผ่านหน้าเว็บเท่านั้น
    เพื่อความปลอดภัยที่แท้จริง ต้องเปิด Row Level Security (RLS) บนทุกตารางฝั่ง
@@ -482,6 +498,11 @@ function showLoginScreen() {
   document.getElementById("appContent").style.display = "none";
   document.getElementById("loginScreen").style.display = "flex";
   document.getElementById("loadingOverlay").style.display = "none";
+  // รีเซ็ตกลับไปขั้นตอนกรอกอีเมล (เผื่อออกจากระบบระหว่างค้างอยู่ที่หน้ากรอกรหัส OTP)
+  document.getElementById("otpForm").style.display = "none";
+  document.getElementById("loginForm").style.display = "block";
+  document.getElementById("loginEmail").value = "";
+  setLoginStatus("", "");
 }
 
 function showAppContent(session) {
@@ -508,7 +529,9 @@ function setLoginStatus(message, type) {
   el.className = "status-" + type; // success | error | info
 }
 
-// ฟอร์มส่ง Magic Link
+// ขั้นตอนที่ 1: ส่งรหัส OTP ไปที่อีเมล
+let PENDING_LOGIN_EMAIL = "";
+
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const email = document.getElementById("loginEmail").value.trim();
@@ -516,23 +539,67 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   if (!email) return;
 
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>กำลังส่งลิงก์...';
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>กำลังส่งรหัส...';
   setLoginStatus("", "");
 
   try {
+    // shouldCreateUser: false ป้องกันไม่ให้คนที่ไม่ได้รับอนุญาตสมัครสมาชิกใหม่ผ่านช่องทางนี้
     const { error } = await sbClient.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: window.location.origin + window.location.pathname }
+      options: { shouldCreateUser: false }
     });
     if (error) throw error;
-    setLoginStatus("ส่งลิงก์เข้าสู่ระบบไปที่อีเมลแล้ว กรุณาตรวจสอบกล่องจดหมาย (รวมถึง Junk/Spam) แล้วคลิกลิงก์เพื่อเข้าใช้งาน", "success");
+
+    PENDING_LOGIN_EMAIL = email;
+    document.getElementById("otpEmailTarget").textContent = "(" + email + ")";
+    document.getElementById("loginForm").style.display = "none";
+    document.getElementById("otpForm").style.display = "block";
+    document.getElementById("loginOtp").value = "";
+    setLoginStatus("ส่งรหัส 6 หลักไปที่อีเมลแล้ว กรุณาตรวจสอบกล่องจดหมาย (รวมถึง Junk/Spam)", "success");
+    document.getElementById("loginOtp").focus();
   } catch (err) {
     console.error(err);
-    setLoginStatus("ส่งลิงก์ไม่สำเร็จ: " + (err.message || "กรุณาลองใหม่อีกครั้ง"), "error");
+    setLoginStatus("ส่งรหัสไม่สำเร็จ: " + (err.message || "กรุณาลองใหม่อีกครั้ง"), "error");
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i>ส่งลิงก์เข้าสู่ระบบ';
+    btn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i>ส่งรหัสเข้าสู่ระบบ';
   }
+});
+
+// ขั้นตอนที่ 2: ยืนยันรหัส OTP 6 หลัก
+document.getElementById("otpForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const token = document.getElementById("loginOtp").value.trim();
+  const btn = document.getElementById("otpSubmitBtn");
+  if (!token || !PENDING_LOGIN_EMAIL) return;
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>กำลังตรวจสอบ...';
+  setLoginStatus("", "");
+
+  try {
+    const { error } = await sbClient.auth.verifyOtp({
+      email: PENDING_LOGIN_EMAIL,
+      token,
+      type: "email"
+    });
+    if (error) throw error;
+    // สำเร็จ: onAuthStateChange (SIGNED_IN) จะเป็นตัวสลับไปหน้าแดชบอร์ดให้อัตโนมัติ
+  } catch (err) {
+    console.error(err);
+    setLoginStatus("รหัสไม่ถูกต้องหรือหมดอายุ: " + (err.message || "กรุณาลองใหม่อีกครั้ง"), "error");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-right-to-bracket me-2"></i>เข้าสู่ระบบ';
+  }
+});
+
+// ปุ่มย้อนกลับไปกรอกอีเมลใหม่ / ขอรหัสใหม่
+document.getElementById("otpBackBtn").addEventListener("click", () => {
+  PENDING_LOGIN_EMAIL = "";
+  document.getElementById("otpForm").style.display = "none";
+  document.getElementById("loginForm").style.display = "block";
+  setLoginStatus("", "");
 });
 
 // ปุ่มออกจากระบบ
